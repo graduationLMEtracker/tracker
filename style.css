@@ -10,7 +10,7 @@ body {
 
 .container {
     width: 100%;
-    max-width: 800px;
+    max-width: 850px;
 }
 
 .card {
@@ -38,6 +38,8 @@ h1 { color: #4a90e2; margin: 0 0 10px 0; }
     border-radius: 8px;
     margin-bottom: 20px;
     border: 1px solid #333;
+    gap: 10px;
+    flex-wrap: wrap;
 }
 
 table {
@@ -59,13 +61,13 @@ th { color: #888; font-size: 0.8em; text-transform: uppercase; }
     border: none;
     cursor: pointer;
     font-weight: bold;
-    transition: opacity 0.2s;
 }
 
 .btn:hover { opacity: 0.8; }
 .primary { background: #4a90e2; color: white; }
 .danger { background: #cf6679; color: black; }
 .warning { background: #f39c12; color: black; }
+.discord { background: #5865F2; color: white; }
 
 input[type="text"] {
     background: #2a2a2a;
