@@ -3,36 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Graduation LME Tracker</title>
+    <title>LME Tracker</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-    <header>
-        <h1>Graduation LME Tracker</h1>
-        <div id="auth-status">
-            <span id="user-email"></span>
-            <button id="login-btn" onclick="location.href='login.html'">Admin Login</button>
-            <button id="logout-btn" style="display:none;" onclick="logout()">Logout</button>
+    <div class="container">
+        <header>
+            <h1>Graduation LME Tracker</h1>
+            <div id="auth-status">
+                <span id="user-email"></span>
+                <button id="login-btn" class="btn secondary" onclick="location.href='login.html'">Admin Login</button>
+                <button id="logout-btn" class="btn danger" style="display:none;" onclick="logout()">Logout</button>
+            </div>
+        </header>
+
+        <div id="admin-tools" class="card admin-card" style="display:none;">
+            <h3>Clan Management</h3>
+            <div class="input-group">
+                <input type="text" id="new-member-name" placeholder="Enter member name...">
+                <button class="btn primary" onclick="addMember()">Add Member</button>
+            </div>
         </div>
-    </header>
 
-    <main>
-        <table>
-            <thead>
-                <tr>
-                    <th>Member Name</th>
-                    <th>Hit 1</th>
-                    <th>Hit 2</th>
-                    <th>Hit 3</th>
-                </tr>
-            </thead>
-            <tbody id="member-list">
-                <tr><td colspan="4">Loading clan members...</td></tr>
-            </tbody>
-        </table>
-    </main>
-
+        <div class="card">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Member Name</th>
+                        <th>Hit 1</th>
+                        <th>Hit 2</th>
+                        <th>Hit 3</th>
+                        <th class="admin-only" style="display:none;">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="member-list">
+                    <tr><td colspan="5" style="text-align:center;">Loading clan data...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
     <script src="app.js"></script>
 </body>
 </html>
