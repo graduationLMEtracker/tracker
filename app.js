@@ -1,6 +1,7 @@
 const SB_URL = 'https://mcdiohrcotqrldydpswg.supabase.co';
 const SB_KEY = 'sb_publishable_jkGjJ5973O6jiiN9XRKs4g_iK9R1s8m';
 const _supabase = supabase.createClient(SB_URL, SB_KEY);
+const DISCORD_WEBHOOK = 'https://discord.com/api/webhooks/1491630373061263371/GYNn3UMbzIdjbekl1jfug4yEoSVv4Ektzuxv7I174PRtcnJxR12namIyidhhmSLFheAJ';
 
 async function init() {
     const { data: { session } } = await _supabase.auth.getSession();
@@ -33,8 +34,6 @@ async function fetchMembers(isAdmin) {
 
     data.forEach(m => {
         const row = document.createElement('tr');
-        
-        // If logged in, show an input box. If logged out, show plain text.
         const nameCell = isAdmin 
             ? `<input type="text" class="edit-name-input" value="${m.member_name}" onchange="updateMemberName(${m.id}, this.value)">`
             : `<span>${m.member_name}</span>`;
@@ -64,7 +63,6 @@ async function addMember() {
     const nameInput = document.getElementById('new-member-name');
     const name = nameInput.value.trim();
     if (!name) return;
-
     const { error } = await _supabase.from('boss_hits').insert([{ member_name: name }]);
     if (error) alert(error.message);
     else location.reload();
@@ -77,8 +75,37 @@ async function clearAllHits() {
     }
 }
 
+async function sendToDiscord() {
+    const { data } = await _supabase.from('boss_hits').select('*').order('member_name');
+    
+    let description = "";
+    data.forEach(m => {
+        const h1 = m.hit_1 ? "✅" : "❌";
+        const h2 = m.hit_2 ? "✅" : "❌";
+        const h3 = m.hit_3 ? "✅" : "❌";
+        description += `**${m.member_name}**: ${h1} ${h2} ${h3}\n`;
+    });
+
+    const embed = {
+        title: "🛡️ Graduation LME - Boss Hits Update",
+        description: description,
+        color: 4875762, // Discord Blue
+        timestamp: new Date(),
+        footer: { text: "Tracker updated by Admin" }
+    };
+
+    const response = await fetch(DISCORD_WEBHOOK, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ embeds: [embed] })
+    });
+
+    if (response.ok) alert("Posted to Discord!");
+    else alert("Post failed.");
+}
+
 async function delMember(id) {
-    if (confirm("Are you sure you want to remove this member?")) {
+    if (confirm("Remove this member?")) {
         await _supabase.from('boss_hits').delete().eq('id', id);
         location.reload();
     }
