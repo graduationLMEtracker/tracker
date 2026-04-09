@@ -1,8 +1,7 @@
 const SB_URL = 'https://mcdiohrcotqrldydpswg.supabase.co';
 const SB_KEY = 'sb_publishable_jkGjJ5973O6jiiN9XRKs4g_iK9R1s8m';
 const _supabase = supabase.createClient(SB_URL, SB_KEY);
-const DISCORD_WEBHOOK = 'https://discord.com/api/webhooks/1491630373061263371/GYNn3UMbzIdjbekl1jfug4yEoSVv4Ektzuxv7I174PRtcnJxR12namIyidhhmSLFheAJ';
-
+const DISCORD_WEBHOOK = 'https://discord.com/api/webhooks/1491631332936253530/wHXUuVlzPQF40J7XYocfwp58LMdVFA4g4RqPJk4Kcr2S_OiaksvTOWVaoevB4fNjewC0"
 async function init() {
     const { data: { session } } = await _supabase.auth.getSession();
     const isAdmin = !!session;
