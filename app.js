@@ -1,37 +1,52 @@
-const _supabase = supabase.createClient('YOUR_SUPABASE_URL', 'YOUR_SUPABASE_ANON_KEY');
+const SB_URL = 'https://mcdiohrcotqrldydpswg.supabase.co';
+const SB_KEY = 'PASTE_YOUR_ANON_KEY_HERE'; // Get this from Supabase Settings > API
+const _supabase = supabase.createClient(SB_URL, SB_KEY);
 
-async function loadTable() {
-    const { data: session } = await _supabase.auth.getSession();
-    const isAdmin = !!session.session;
+async function init() {
+    const { data: { session } } = await _supabase.auth.getSession();
+    const isAdmin = !!session;
 
     if (isAdmin) {
-        document.getElementById('admin-controls').style.display = 'block';
-        document.getElementById('login-section').style.display = 'none';
+        document.getElementById('login-btn').style.display = 'none';
+        document.getElementById('logout-btn').style.display = 'inline-block';
+        document.getElementById('user-email').innerText = session.user.email;
     }
 
-    const { data, error } = await _supabase.from('boss_hits').select('*').order('member_name', { ascending: true });
-    
-    const tbody = document.getElementById('hit-table-body');
-    tbody.innerHTML = '';
+    fetchMembers(isAdmin);
+}
+
+async function fetchMembers(isAdmin) {
+    const { data, error } = await _supabase
+        .from('boss_hits')
+        .select('*')
+        .order('member_name', { ascending: true });
+
+    if (error) {
+        console.error(error);
+        document.getElementById('member-list').innerHTML = `<tr><td colspan="4">Error: ${error.message}</td></tr>`;
+        return;
+    }
+
+    const list = document.getElementById('member-list');
+    list.innerHTML = '';
 
     data.forEach(member => {
-        const row = `
-            <tr>
-                <td>${member.member_name}</td>
-                <td><input type="checkbox" ${member.hit_1 ? 'checked' : ''} ${!isAdmin ? 'disabled' : ''} onchange="updateHit(${member.id}, 'hit_1', this.checked)"></td>
-                <td><input type="checkbox" ${member.hit_2 ? 'checked' : ''} ${!isAdmin ? 'disabled' : ''} onchange="updateHit(${member.id}, 'hit_2', this.checked)"></td>
-                <td><input type="checkbox" ${member.hit_3 ? 'checked' : ''} ${!isAdmin ? 'disabled' : ''} onchange="updateHit(${member.id}, 'hit_3', this.checked)"></td>
-            </tr>
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${member.member_name}</td>
+            <td><input type="checkbox" ${member.hit_1 ? 'checked' : ''} ${!isAdmin ? 'disabled' : ''} onchange="updateHit(${member.id}, 'hit_1', this.checked)"></td>
+            <td><input type="checkbox" ${member.hit_2 ? 'checked' : ''} ${!isAdmin ? 'disabled' : ''} onchange="updateHit(${member.id}, 'hit_2', this.checked)"></td>
+            <td><input type="checkbox" ${member.hit_3 ? 'checked' : ''} ${!isAdmin ? 'disabled' : ''} onchange="updateHit(${member.id}, 'hit_3', this.checked)"></td>
         `;
-        tbody.innerHTML += row;
+        list.appendChild(row);
     });
 }
 
 async function updateHit(id, column, value) {
-    const updateData = {};
-    updateData[column] = value;
-    const { error } = await _supabase.from('boss_hits').update(updateData).eq('id', id);
-    if (error) alert("Error updating: " + error.message);
+    const obj = {};
+    obj[column] = value;
+    const { error } = await _supabase.from('boss_hits').update(obj).eq('id', id);
+    if (error) alert("Update failed: " + error.message);
 }
 
 async function logout() {
@@ -39,4 +54,4 @@ async function logout() {
     window.location.reload();
 }
 
-loadTable();
+init();
