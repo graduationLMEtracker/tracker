@@ -106,3 +106,11 @@ async function sendToDiscord() {
     });
     desc += "
 http://googleusercontent.com/immersive_entry_chip/0
+
+### Steps to ensure success:
+1.  **Delete everything** currently in your `app.js` on GitHub first.
+2.  **Paste** this version in.
+3.  **Commit the changes.**
+4.  **Crucial:** Clear your browser cache or open the page in an **Incognito** window. GitHub takes a minute to push the new file, and your browser loves to hold onto the old "broken" version.
+
+That "Invalid token" error should vanish, and your list should pop up immediately! Does the "Connecting" message finally disappear?
