@@ -6,19 +6,21 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-    <div class="login-container">
-        <h2>Admin Login</h2>
-        <form id="login-form">
-            <input type="email" id="email" placeholder="Email" required><br>
-            <input type="password" id="password" placeholder="Password" required><br>
-            <button type="submit">Log In</button>
+    <div style="margin-top: 50px; text-align: center;">
+        <h2>Graduation LME Admin Login</h2>
+        <form id="login-form" style="display: inline-block; text-align: left; background: #2a2a2a; padding: 20px; border-radius: 8px;">
+            <label>Email:</label><br>
+            <input type="email" id="email" required style="margin-bottom: 10px; width: 200px;"><br>
+            <label>Password:</label><br>
+            <input type="password" id="password" required style="margin-bottom: 20px; width: 200px;"><br>
+            <button type="submit" style="width: 100%; padding: 10px; background: #4a90e2; color: white; border: none; border-radius: 4px; cursor: pointer;">Log In</button>
         </form>
-        <p><a href="index.html">Back to Tracker</a></p>
+        <p><a href="index.html" style="color: #4a90e2;">Back to Tracker</a></p>
     </div>
 
     <script>
         const SB_URL = 'https://mcdiohrcotqrldydpswg.supabase.co';
-        const SB_KEY = 'PASTE_YOUR_ANON_KEY_HERE';
+        const SB_KEY = 'sb_publishable_jkGjJ5973O6jiiN9XRKs4g_iK9R1s8m';
         const _supabase = supabase.createClient(SB_URL, SB_KEY);
 
         document.getElementById('login-form').addEventListener('submit', async (e) => {
