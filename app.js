@@ -77,21 +77,33 @@ async function sendToDiscord() {
     const res = await _supabase.from('boss_hits').select('*').order('member_name');
     if (res.error) return alert("Error: " + res.error.message);
 
-    let text = "```\nNAME             H1  H2  H3\n---------------------------\n";
+    let text = "**[H1] [H2] [H3] | MEMBER NAME**\n";
+    text += "--------------------------------------\n";
+    
     res.data.forEach(function(m) {
-        let n = m.member_name.padEnd(16).substring(0, 16);
-        let h1 = m.hit_1 ? "X " : "OK";
-        let h2 = m.hit_2 ? "X " : "OK";
-        let h3 = m.hit_3 ? "X " : "OK";
-        text += n + " [" + h1 + "] [" + h2 + "] [" + h3 + "]\n";
+        // If checked on dashboard (hit_1 is true), show Red X (Strike)
+        // If unchecked, show Green Check (Good)
+        const h1 = m.hit_1 ? "❌" : "✅";
+        const h2 = m.hit_2 ? "❌" : "✅";
+        const h3 = m.hit_3 ? "❌" : "✅";
+        
+        text += h1 + " " + h2 + " " + h3 + " | **" + m.member_name + "**\n";
     });
-    text += "```\n*OK = Needs Hit | X = Done*";
+    
+    text += "\n*✅ = Hit Complete | ❌ = STRIKE (Missed Hit)*";
     
     try {
         const response = await fetch(DISCORD_WEBHOOK, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ embeds: [{ title: "LME Tracker Update", description: text, color: 15158332 }] })
+            body: JSON.stringify({ 
+                embeds: [{ 
+                    title: "🛡️ Graduation LME - Strike Report", 
+                    description: text, 
+                    color: 15158332,
+                    timestamp: new Date()
+                }] 
+            })
         });
         if (response.ok) alert("Posted to Discord!");
         else alert("Discord error: " + response.status);
