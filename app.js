@@ -8,7 +8,7 @@ async function init() {
     try {
         _supabase = supabase.createClient(SB_URL, SB_KEY);
     } catch (e) {
-        document.getElementById('member-list').innerHTML = `<tr><td colspan="5">Library Error: Refresh the page.</td></tr>`;
+        document.getElementById('member-list').innerHTML = `<tr><td colspan="5">Library Error: Refresh.</td></tr>`;
         return;
     }
 
@@ -33,19 +33,10 @@ async function fetchMembers(isAdmin) {
         .order('member_name', { ascending: true });
 
     const list = document.getElementById('member-list');
-
-    if (error) {
-        list.innerHTML = `<tr><td colspan="5">Database Error: ${error.message}</td></tr>`;
-        return;
-    }
-
-    if (!data || data.length === 0) {
-        list.innerHTML = `<tr><td colspan="5">No members found. Use Admin tools to add some!</td></tr>`;
-        return;
-    }
+    if (error) { list.innerHTML = `<tr><td colspan="5">Error: ${error.message}</td></tr>`; return; }
+    if (!data || data.length === 0) { list.innerHTML = `<tr><td colspan="5">No members found.</td></tr>`; return; }
 
     list.innerHTML = '';
-
     data.forEach(m => {
         const row = document.createElement('tr');
         const nameCell = isAdmin 
@@ -78,12 +69,11 @@ async function addMember() {
     const name = nameInput.value.trim();
     if (!name) return;
     const { error } = await _supabase.from('boss_hits').insert([{ member_name: name }]);
-    if (error) alert(error.message);
-    else location.reload();
+    if (error) alert(error.message); else location.reload();
 }
 
 async function clearAllHits() {
-    if (confirm("Reset all hits for everyone?")) {
+    if (confirm("Reset all hits?")) {
         await _supabase.from('boss_hits').update({ hit_1: false, hit_2: false, hit_3: false }).neq('id', 0);
         location.reload();
     }
@@ -93,46 +83,32 @@ async function sendToDiscord() {
     const { data, error: dbError } = await _supabase.from('boss_hits').select('*').order('member_name');
     if (dbError) return alert("Database error: " + dbError.message);
 
-    let description = "✅ = Needs to Hit | ❌ = Hit Complete\n\n";
+    // Find the longest name to set the padding
+    let maxNameLength = 0;
+    data.forEach(m => { if (m.member_name.length > maxNameLength) maxNameLength = m.member_name.length; });
+    
+    // Add a little extra buffer
+    const columnWidth = maxNameLength + 2;
+
+    let description = "```\n";
+    description += "NAME".padEnd(columnWidth) + " H1  H2  H3\n";
+    description += "-".repeat(columnWidth + 12) + "\n";
+
     data.forEach(m => {
-        // Reversed Logic: If true (checked on web), show X. If false, show Check.
-        const h1 = m.hit_1 ? "❌" : "✅";
-        const h2 = m.hit_2 ? "❌" : "✅";
-        const h3 = m.hit_3 ? "❌" : "✅";
-        description += `**${m.member_name}**: ${h1} ${h2} ${h3}\n`;
+        const h1 = m.hit_1 ? "X " : "OK";
+        const h2 = m.hit_2 ? "X " : "OK";
+        const h3 = m.hit_3 ? "X " : "OK";
+        
+        // Pad the name so the hits start at the same spot
+        const paddedName = m.member_name.padEnd(columnWidth);
+        description += `${paddedName} [${h1}] [${h2}] [${h3}]\n`;
     });
+    description += "
+http://googleusercontent.com/immersive_entry_chip/0
 
-    const embed = {
-        title: "🛡️ Graduation LME - Pending Boss Hits",
-        description: description || "No members found.",
-        color: 15158332, // Red color for urgency
-        timestamp: new Date(),
-        footer: { text: "Get those hits in!" }
-    };
+### What's different?
+* **The Look:** I switched from Emojis (✅/❌) to text markers (**OK** and **X**) inside the code block. Discord emojis in code blocks don't always align perfectly on mobile, whereas text characters are 100% stable.
+* **The Spacing:** I used `.padEnd()`, which looks at the longest name in your list and adds spaces to every other name so they all match that length.
+* **The Legend:** I added a footer so people know "OK" means they are safe/need to hit, and "X" means they've completed their task.
 
-    try {
-        const response = await fetch(DISCORD_WEBHOOK, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ embeds: [embed] })
-        });
-        if (response.ok) alert("Posted to Discord!");
-        else alert("Post failed: Discord blocked the request.");
-    } catch (err) {
-        alert("Network error checking Discord.");
-    }
-}
-
-async function delMember(id) {
-    if (confirm("Remove this member?")) {
-        await _supabase.from('boss_hits').delete().eq('id', id);
-        location.reload();
-    }
-}
-
-async function logout() {
-    await _supabase.auth.signOut();
-    location.reload();
-}
-
-setTimeout(init, 500);
+**Push this to GitHub, wait a minute, and try a test post. It should look like a clean, professional spreadsheet in your Discord channel now!**
