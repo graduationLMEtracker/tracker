@@ -1,11 +1,17 @@
 const SB_URL = 'https://mcdiohrcotqrldydpswg.supabase.co';
 const SB_KEY = 'sb_publishable_jkGjJ5973O6jiiN9XRKs4g_iK9R1s8m';
-const _supabase = supabase.createClient(SB_URL, SB_KEY);
-
-// Updated with your newest Webhook URL
 const DISCORD_WEBHOOK = 'https://discord.com/api/webhooks/1491631332936253530/wHXUuVlzPQF40J7XYocfwp58LMdVFA4g4RqPJk4Kcr2S_OiaksvTOWVaoevB4fNjewC0';
 
+let _supabase;
+
 async function init() {
+    try {
+        _supabase = supabase.createClient(SB_URL, SB_KEY);
+    } catch (e) {
+        document.getElementById('member-list').innerHTML = `<tr><td colspan="5">Library Error: Refresh the page.</td></tr>`;
+        return;
+    }
+
     const { data: { session } } = await _supabase.auth.getSession();
     const isAdmin = !!session;
 
@@ -26,12 +32,18 @@ async function fetchMembers(isAdmin) {
         .select('*')
         .order('member_name', { ascending: true });
 
+    const list = document.getElementById('member-list');
+
     if (error) {
-        document.getElementById('member-list').innerHTML = `<tr><td colspan="5">Error: ${error.message}</td></tr>`;
+        list.innerHTML = `<tr><td colspan="5">Database Error: ${error.message}</td></tr>`;
         return;
     }
 
-    const list = document.getElementById('member-list');
+    if (!data || data.length === 0) {
+        list.innerHTML = `<tr><td colspan="5">No members found. Use Admin tools to add some!</td></tr>`;
+        return;
+    }
+
     list.innerHTML = '';
 
     data.forEach(m => {
@@ -79,23 +91,23 @@ async function clearAllHits() {
 
 async function sendToDiscord() {
     const { data, error: dbError } = await _supabase.from('boss_hits').select('*').order('member_name');
-    
     if (dbError) return alert("Database error: " + dbError.message);
 
-    let description = "";
+    let description = "✅ = Needs to Hit | ❌ = Hit Complete\n\n";
     data.forEach(m => {
-        const h1 = m.hit_1 ? "✅" : "❌";
-        const h2 = m.hit_2 ? "✅" : "❌";
-        const h3 = m.hit_3 ? "✅" : "❌";
+        // Reversed Logic: If true (checked on web), show X. If false, show Check.
+        const h1 = m.hit_1 ? "❌" : "✅";
+        const h2 = m.hit_2 ? "❌" : "✅";
+        const h3 = m.hit_3 ? "❌" : "✅";
         description += `**${m.member_name}**: ${h1} ${h2} ${h3}\n`;
     });
 
     const embed = {
-        title: "🛡️ Graduation LME - Boss Hits Update",
+        title: "🛡️ Graduation LME - Pending Boss Hits",
         description: description || "No members found.",
-        color: 5814783,
+        color: 15158332, // Red color for urgency
         timestamp: new Date(),
-        footer: { text: "Tracker updated via Web Dashboard" }
+        footer: { text: "Get those hits in!" }
     };
 
     try {
@@ -104,15 +116,10 @@ async function sendToDiscord() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ embeds: [embed] })
         });
-
-        if (response.ok) {
-            alert("Posted to Discord successfully!");
-        } else {
-            const errBody = await response.text();
-            alert(`Discord error ${response.status}: ${errBody}`);
-        }
+        if (response.ok) alert("Posted to Discord!");
+        else alert("Post failed: Discord blocked the request.");
     } catch (err) {
-        alert("Network error: Check your connection or Webhook URL.");
+        alert("Network error checking Discord.");
     }
 }
 
@@ -128,4 +135,4 @@ async function logout() {
     location.reload();
 }
 
-init();
+setTimeout(init, 500);
