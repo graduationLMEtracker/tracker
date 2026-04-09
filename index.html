@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Graduation LME Tracker</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>Graduation LME Tracker</h1>
+    
+    <div id="admin-controls" style="display:none;">
+        <p>Logged in as Admin | <button onclick="logout()">Logout</button></p>
+    </div>
+    <div id="login-section">
+        <a href="login.html">Admin Login</a>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Member</th>
+                <th>Hit 1</th>
+                <th>Hit 2</th>
+                <th>Hit 3</th>
+            </tr>
+        </thead>
+        <tbody id="hit-table-body">
+            </tbody>
+    </table>
+
+    <script src="app.js"></script>
+</body>
+</html>
