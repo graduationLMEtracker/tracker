@@ -10,29 +10,41 @@ async function init() {
         document.getElementById('login-btn').style.display = 'none';
         document.getElementById('logout-btn').style.display = 'inline-block';
         document.getElementById('admin-tools').style.display = 'flex';
-        document.getElementById('user-email').innerText = session.user.email;
+        document.getElementById('user-email').innerText = session.user.email + " | ";
         document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'table-cell');
     }
+
     fetchMembers(isAdmin);
 }
 
 async function fetchMembers(isAdmin) {
-    const { data } = await _supabase.from('boss_hits').select('*').order('member_name');
+    const { data, error } = await _supabase
+        .from('boss_hits')
+        .select('*')
+        .order('member_name', { ascending: true });
+
+    if (error) {
+        document.getElementById('member-list').innerHTML = `<tr><td colspan="5">Error: ${error.message}</td></tr>`;
+        return;
+    }
+
     const list = document.getElementById('member-list');
     list.innerHTML = '';
 
     data.forEach(m => {
         const row = document.createElement('tr');
+        
+        // If logged in, show an input box. If logged out, show plain text.
+        const nameCell = isAdmin 
+            ? `<input type="text" class="edit-name-input" value="${m.member_name}" onchange="updateMemberName(${m.id}, this.value)">`
+            : `<span>${m.member_name}</span>`;
+
         row.innerHTML = `
-            <td>
-                <input type="text" class="edit-name-input" value="${m.member_name}" 
-                ${!isAdmin ? 'readonly' : ''} 
-                onchange="updateMemberName(${m.id}, this.value)">
-            </td>
+            <td>${nameCell}</td>
             <td><input type="checkbox" ${m.hit_1 ? 'checked' : ''} ${!isAdmin ? 'disabled' : ''} onchange="updateHit(${m.id}, 'hit_1', this.checked)"></td>
             <td><input type="checkbox" ${m.hit_2 ? 'checked' : ''} ${!isAdmin ? 'disabled' : ''} onchange="updateHit(${m.id}, 'hit_2', this.checked)"></td>
             <td><input type="checkbox" ${m.hit_3 ? 'checked' : ''} ${!isAdmin ? 'disabled' : ''} onchange="updateHit(${m.id}, 'hit_3', this.checked)"></td>
-            ${isAdmin ? `<td class="admin-only"><button class="btn danger" onclick="del(${m.id})">Delete</button></td>` : ''}
+            ${isAdmin ? `<td class="admin-only"><button class="btn danger" onclick="delMember(${m.id})">Remove</button></td>` : ''}
         `;
         list.appendChild(row);
     });
@@ -44,25 +56,29 @@ async function updateHit(id, col, val) {
 }
 
 async function updateMemberName(id, newName) {
+    if (!newName.trim()) return;
     await _supabase.from('boss_hits').update({ member_name: newName }).eq('id', id);
 }
 
 async function addMember() {
-    const name = document.getElementById('new-member-name').value;
+    const nameInput = document.getElementById('new-member-name');
+    const name = nameInput.value.trim();
     if (!name) return;
-    await _supabase.from('boss_hits').insert([{ member_name: name }]);
-    location.reload();
+
+    const { error } = await _supabase.from('boss_hits').insert([{ member_name: name }]);
+    if (error) alert(error.message);
+    else location.reload();
 }
 
 async function clearAllHits() {
-    if (confirm("Reset all hits to 0 for the whole clan?")) {
+    if (confirm("Reset all hits for everyone?")) {
         await _supabase.from('boss_hits').update({ hit_1: false, hit_2: false, hit_3: false }).neq('id', 0);
         location.reload();
     }
 }
 
-async function del(id) {
-    if (confirm("Remove this member?")) {
+async function delMember(id) {
+    if (confirm("Are you sure you want to remove this member?")) {
         await _supabase.from('boss_hits').delete().eq('id', id);
         location.reload();
     }
