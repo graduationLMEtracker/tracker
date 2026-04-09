@@ -9,67 +9,68 @@ async function init() {
     if (isAdmin) {
         document.getElementById('login-btn').style.display = 'none';
         document.getElementById('logout-btn').style.display = 'inline-block';
+        document.getElementById('admin-tools').style.display = 'flex';
         document.getElementById('user-email').innerText = session.user.email;
-        document.getElementById('admin-tools').style.display = 'block';
+        document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'table-cell');
     }
-
     fetchMembers(isAdmin);
 }
 
 async function fetchMembers(isAdmin) {
-    const { data, error } = await _supabase
-        .from('boss_hits')
-        .select('*')
-        .order('member_name', { ascending: true });
-
-    if (error) {
-        document.getElementById('member-list').innerHTML = `<tr><td colspan="5">Error loading data.</td></tr>`;
-        return;
-    }
-
+    const { data } = await _supabase.from('boss_hits').select('*').order('member_name');
     const list = document.getElementById('member-list');
     list.innerHTML = '';
 
-    // Show action header if admin
-    if(isAdmin) document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'table-cell');
-
-    data.forEach(member => {
+    data.forEach(m => {
         const row = document.createElement('tr');
         row.innerHTML = `
-            <td>${member.member_name}</td>
-            <td><input type="checkbox" ${member.hit_1 ? 'checked' : ''} ${!isAdmin ? 'disabled' : ''} onchange="updateHit(${member.id}, 'hit_1', this.checked)"></td>
-            <td><input type="checkbox" ${member.hit_2 ? 'checked' : ''} ${!isAdmin ? 'disabled' : ''} onchange="updateHit(${member.id}, 'hit_2', this.checked)"></td>
-            <td><input type="checkbox" ${member.hit_3 ? 'checked' : ''} ${!isAdmin ? 'disabled' : ''} onchange="updateHit(${member.id}, 'hit_3', this.checked)"></td>
-            ${isAdmin ? `<td><button class="btn danger" style="padding: 4px 8px; font-size: 0.7em;" onclick="deleteMember(${member.id})">Remove</button></td>` : ''}
+            <td>
+                <input type="text" class="edit-name-input" value="${m.member_name}" 
+                ${!isAdmin ? 'readonly' : ''} 
+                onchange="updateMemberName(${m.id}, this.value)">
+            </td>
+            <td><input type="checkbox" ${m.hit_1 ? 'checked' : ''} ${!isAdmin ? 'disabled' : ''} onchange="updateHit(${m.id}, 'hit_1', this.checked)"></td>
+            <td><input type="checkbox" ${m.hit_2 ? 'checked' : ''} ${!isAdmin ? 'disabled' : ''} onchange="updateHit(${m.id}, 'hit_2', this.checked)"></td>
+            <td><input type="checkbox" ${m.hit_3 ? 'checked' : ''} ${!isAdmin ? 'disabled' : ''} onchange="updateHit(${m.id}, 'hit_3', this.checked)"></td>
+            ${isAdmin ? `<td class="admin-only"><button class="btn danger" onclick="del(${m.id})">Delete</button></td>` : ''}
         `;
         list.appendChild(row);
     });
 }
 
-async function updateHit(id, column, value) {
-    const obj = {};
-    obj[column] = value;
-    await _supabase.from('boss_hits').update(obj).eq('id', id);
+async function updateHit(id, col, val) {
+    const upd = {}; upd[col] = val;
+    await _supabase.from('boss_hits').update(upd).eq('id', id);
+}
+
+async function updateMemberName(id, newName) {
+    await _supabase.from('boss_hits').update({ member_name: newName }).eq('id', id);
 }
 
 async function addMember() {
     const name = document.getElementById('new-member-name').value;
     if (!name) return;
     await _supabase.from('boss_hits').insert([{ member_name: name }]);
-    document.getElementById('new-member-name').value = '';
-    init();
+    location.reload();
 }
 
-async function deleteMember(id) {
+async function clearAllHits() {
+    if (confirm("Reset all hits to 0 for the whole clan?")) {
+        await _supabase.from('boss_hits').update({ hit_1: false, hit_2: false, hit_3: false }).neq('id', 0);
+        location.reload();
+    }
+}
+
+async function del(id) {
     if (confirm("Remove this member?")) {
         await _supabase.from('boss_hits').delete().eq('id', id);
-        init();
+        location.reload();
     }
 }
 
 async function logout() {
     await _supabase.auth.signOut();
-    window.location.reload();
+    location.reload();
 }
 
 init();
