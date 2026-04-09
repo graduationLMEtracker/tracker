@@ -1,32 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Graduation LME Tracker</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-    <h1>Graduation LME Tracker</h1>
-    
-    <div id="admin-controls" style="display:none;">
-        <p>Logged in as Admin | <button onclick="logout()">Logout</button></p>
-    </div>
-    <div id="login-section">
-        <a href="login.html">Admin Login</a>
-    </div>
+    <header>
+        <h1>Graduation LME Tracker</h1>
+        <div id="auth-status">
+            <span id="user-email"></span>
+            <button id="login-btn" onclick="location.href='login.html'">Admin Login</button>
+            <button id="logout-btn" style="display:none;" onclick="logout()">Logout</button>
+        </div>
+    </header>
 
-    <table>
-        <thead>
-            <tr>
-                <th>Member</th>
-                <th>Hit 1</th>
-                <th>Hit 2</th>
-                <th>Hit 3</th>
-            </tr>
-        </thead>
-        <tbody id="hit-table-body">
+    <main>
+        <table>
+            <thead>
+                <tr>
+                    <th>Member Name</th>
+                    <th>Hit 1</th>
+                    <th>Hit 2</th>
+                    <th>Hit 3</th>
+                </tr>
+            </thead>
+            <tbody id="member-list">
+                <tr><td colspan="4">Loading clan members...</td></tr>
             </tbody>
-    </table>
+        </table>
+    </main>
 
     <script src="app.js"></script>
 </body>
