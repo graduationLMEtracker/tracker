@@ -10,29 +10,36 @@ async function init() {
         return;
     }
     _supabase = supabase.createClient(SB_URL, SB_KEY);
-    const { data: { session } } = await _supabase.auth.getSession();
-    const isAdmin = !!session;
+    const sessionRes = await _supabase.auth.getSession();
+    const isAdmin = !!(sessionRes.data && sessionRes.data.session);
+    
     if (isAdmin) {
         document.getElementById('login-btn').style.display = 'none';
         document.getElementById('logout-btn').style.display = 'inline-block';
         document.getElementById('admin-tools').style.display = 'flex';
-        document.getElementById('user-email').innerText = session.user.email + " | ";
-        document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'table-cell');
+        document.getElementById('user-email').innerText = sessionRes.data.session.user.email + " | ";
+        const adminElements = document.querySelectorAll('.admin-only');
+        for (let i = 0; i < adminElements.length; i++) {
+            adminElements[i].style.display = 'table-cell';
+        }
     }
     fetchMembers(isAdmin);
 }
 
 async function fetchMembers(isAdmin) {
     const list = document.getElementById('member-list');
-    const { data, error } = await _supabase.from('boss_hits').select('*').order('member_name', { ascending: true });
-    if (error) {
-        list.innerHTML = '<tr><td colspan="5">Error: ' + error.message + '</td></tr>';
+    const res = await _supabase.from('boss_hits').select('*').order('member_name', { ascending: true });
+    
+    if (res.error) {
+        list.innerHTML = '<tr><td colspan="5">Error: ' + res.error.message + '</td></tr>';
         return;
     }
+    
     list.innerHTML = '';
-    data.forEach(m => {
+    res.data.forEach(function(m) {
         const row = document.createElement('tr');
         const nameDisplay = isAdmin ? '<input type="text" class="edit-name-input" value="' + m.member_name + '" onchange="updateMemberName(' + m.id + ', this.value)">' : '<span>' + m.member_name + '</span>';
+        
         row.innerHTML = '<td>' + nameDisplay + '</td>' +
             '<td><input type="checkbox" ' + (m.hit_1 ? 'checked' : '') + ' ' + (!isAdmin ? 'disabled' : '') + ' onchange="updateHit(' + m.id + ', \'hit_1\', this.checked)"></td>' +
             '<td><input type="checkbox" ' + (m.hit_2 ? 'checked' : '') + ' ' + (!isAdmin ? 'disabled' : '') + ' onchange="updateHit(' + m.id + ', \'hit_2\', this.checked)"></td>' +
@@ -67,9 +74,11 @@ async function clearAllHits() {
 }
 
 async function sendToDiscord() {
-    const { data } = await _supabase.from('boss_hits').select('*').order('member_name');
+    const res = await _supabase.from('boss_hits').select('*').order('member_name');
+    if (res.error) return alert("Error: " + res.error.message);
+
     let text = "```\nNAME             H1  H2  H3\n---------------------------\n";
-    data.forEach(m => {
+    res.data.forEach(function(m) {
         let n = m.member_name.padEnd(16).substring(0, 16);
         let h1 = m.hit_1 ? "X " : "OK";
         let h2 = m.hit_2 ? "X " : "OK";
@@ -77,12 +86,18 @@ async function sendToDiscord() {
         text += n + " [" + h1 + "] [" + h2 + "] [" + h3 + "]\n";
     });
     text += "```\n*OK = Needs Hit | X = Done*";
-    await fetch(DISCORD_WEBHOOK, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ embeds: [{ title: "LME Tracker Update", description: text, color: 15158332 }] })
-    });
-    alert("Posted!");
+    
+    try {
+        const response = await fetch(DISCORD_WEBHOOK, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ embeds: [{ title: "LME Tracker Update", description: text, color: 15158332 }] })
+        });
+        if (response.ok) alert("Posted to Discord!");
+        else alert("Discord error: " + response.status);
+    } catch (e) {
+        alert("Network error.");
+    }
 }
 
 async function delMember(id) {
