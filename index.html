@@ -1,7 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>LME Tracker Pro</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Graduation LME Tracker</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -9,30 +11,34 @@
     <div class="container">
         <div id="auth-status">
             <span id="user-email"></span>
-            <button id="login-btn" class="btn primary" onclick="location.href='login.html'">Login</button>
+            <button id="login-btn" class="btn primary" onclick="location.href='login.html'">Admin Login</button>
             <button id="logout-btn" class="btn danger" style="display:none;" onclick="logout()">Logout</button>
         </div>
 
         <div class="card">
             <h1>LME Tracker</h1>
-            
+
             <div id="admin-tools" style="display:none;" class="admin-bar">
                 <div>
-                    <input type="text" id="new-member-name" placeholder="New Member Name">
-                    <button class="btn primary" onclick="addMember()">Add</button>
+                    <input type="text" id="new-member-name" placeholder="Member Name">
+                    <button class="btn primary" onclick="addMember()">Add Member</button>
                 </div>
-                <button class="btn warning" onclick="clearAllHits()">Reset All Checks</button>
+                <button class="btn warning" onclick="clearAllHits()">Reset All Hits</button>
             </div>
 
             <table>
                 <thead>
                     <tr>
                         <th>Member Name</th>
-                        <th>H1</th><th>H2</th><th>H3</th>
+                        <th>H1</th>
+                        <th>H2</th>
+                        <th>H3</th>
                         <th class="admin-only" style="display:none;">Action</th>
                     </tr>
                 </thead>
-                <tbody id="member-list"></tbody>
+                <tbody id="member-list">
+                    <tr><td colspan="5">Connecting to database...</td></tr>
+                </tbody>
             </table>
         </div>
     </div>
