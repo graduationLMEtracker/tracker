@@ -5,21 +5,16 @@ const DISCORD_WEBHOOK = 'https://discord.com/api/webhooks/1491631332936253530/wH
 let _supabase;
 
 async function init() {
-    const list = document.getElementById('member-list');
-    
     try {
-        // 1. Check if the Supabase library exists
         if (typeof supabase === 'undefined') {
-            list.innerHTML = `<tr><td colspan="5" style="color:orange;">Loading Library... (If this stays, check your internet)</td></tr>`;
-            setTimeout(init, 1000); // Try again in 1 second
+            console.log("Waiting for Supabase library...");
+            setTimeout(init, 500);
             return;
         }
 
-        // 2. Initialize the client
         _supabase = supabase.createClient(SB_URL, SB_KEY);
 
-        // 3. Check for Admin Login
-        const { data: { session }, error: authError } = await _supabase.auth.getSession();
+        const { data: { session } } = await _supabase.auth.getSession();
         const isAdmin = !!session;
 
         if (isAdmin) {
@@ -30,11 +25,9 @@ async function init() {
             document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'table-cell');
         }
 
-        // 4. Fetch the data
         fetchMembers(isAdmin);
-
     } catch (err) {
-        list.innerHTML = `<tr><td colspan="5" style="color:red;">Critical Error: ${err.message}</td></tr>`;
+        console.error("Init error:", err);
     }
 }
 
@@ -47,11 +40,6 @@ async function fetchMembers(isAdmin) {
 
     if (error) {
         list.innerHTML = `<tr><td colspan="5">Database Error: ${error.message}</td></tr>`;
-        return;
-    }
-
-    if (!data || data.length === 0) {
-        list.innerHTML = `<tr><td colspan="5">No members found. Add some in Admin mode!</td></tr>`;
         return;
     }
 
@@ -118,12 +106,3 @@ async function sendToDiscord() {
     });
     desc += "
 http://googleusercontent.com/immersive_entry_chip/0
-
-### Still having issues?
-If you update this and it **still** says connecting:
-1.  **Check your `index.html`**: Make sure this line is inside your `<head>` tag:
-    `<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>`
-2.  **Hard Refresh**: On your browser, press `Ctrl + F5` (Windows) or `Cmd + Shift + R` (Mac). GitHub sometimes takes a minute to "clear the cache" of the old file.
-3.  **Check the Console**: If it stays stuck, press **F12** and look at the **Console** tab. If there is a red error there, copy and paste it here!
-
-**Does the screen change or show a specific error code now?**
