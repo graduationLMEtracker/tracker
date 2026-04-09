@@ -77,7 +77,7 @@ async function sendToDiscord() {
     const res = await _supabase.from('boss_hits').select('*').order('member_name');
     if (res.error) return alert("Error: " + res.error.message);
 
-    let text = "**[H1] [H2] [H3] | MEMBER NAME**\n";
+    let text = "**[1] [2] [3] | MEMBER NAME**\n";
     text += "--------------------------------------\n";
     
     res.data.forEach(function(m) {
