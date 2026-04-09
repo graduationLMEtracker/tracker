@@ -1,5 +1,5 @@
 const SB_URL = 'https://mcdiohrcotqrldydpswg.supabase.co';
-const SB_KEY = 'PASTE_YOUR_ANON_KEY_HERE'; // Get this from Supabase Settings > API
+const SB_KEY = 'sb_publishable_jkGjJ5973O6jiiN9XRKs4g_iK9R1s8m'; 
 const _supabase = supabase.createClient(SB_URL, SB_KEY);
 
 async function init() {
@@ -9,7 +9,7 @@ async function init() {
     if (isAdmin) {
         document.getElementById('login-btn').style.display = 'none';
         document.getElementById('logout-btn').style.display = 'inline-block';
-        document.getElementById('user-email').innerText = session.user.email;
+        document.getElementById('user-email').innerText = session.user.email + " | ";
     }
 
     fetchMembers(isAdmin);
@@ -29,6 +29,10 @@ async function fetchMembers(isAdmin) {
 
     const list = document.getElementById('member-list');
     list.innerHTML = '';
+
+    if (data.length === 0) {
+        list.innerHTML = '<tr><td colspan="4">No members found. Add some in the Supabase SQL Editor!</td></tr>';
+    }
 
     data.forEach(member => {
         const row = document.createElement('tr');
