@@ -1,7 +1,10 @@
 const SB_URL = 'https://mcdiohrcotqrldydpswg.supabase.co';
 const SB_KEY = 'sb_publishable_jkGjJ5973O6jiiN9XRKs4g_iK9R1s8m';
 const _supabase = supabase.createClient(SB_URL, SB_KEY);
-const DISCORD_WEBHOOK = 'https://discord.com/api/webhooks/1491631332936253530/wHXUuVlzPQF40J7XYocfwp58LMdVFA4g4RqPJk4Kcr2S_OiaksvTOWVaoevB4fNjewC0"
+
+// Updated with your newest Webhook URL
+const DISCORD_WEBHOOK = 'https://discord.com/api/webhooks/1491631332936253530/wHXUuVlzPQF40J7XYocfwp58LMdVFA4g4RqPJk4Kcr2S_OiaksvTOWVaoevB4fNjewC0';
+
 async function init() {
     const { data: { session } } = await _supabase.auth.getSession();
     const isAdmin = !!session;
@@ -75,8 +78,10 @@ async function clearAllHits() {
 }
 
 async function sendToDiscord() {
-    const { data } = await _supabase.from('boss_hits').select('*').order('member_name');
+    const { data, error: dbError } = await _supabase.from('boss_hits').select('*').order('member_name');
     
+    if (dbError) return alert("Database error: " + dbError.message);
+
     let description = "";
     data.forEach(m => {
         const h1 = m.hit_1 ? "✅" : "❌";
@@ -87,20 +92,28 @@ async function sendToDiscord() {
 
     const embed = {
         title: "🛡️ Graduation LME - Boss Hits Update",
-        description: description,
-        color: 4875762, // Discord Blue
+        description: description || "No members found.",
+        color: 5814783,
         timestamp: new Date(),
-        footer: { text: "Tracker updated by Admin" }
+        footer: { text: "Tracker updated via Web Dashboard" }
     };
 
-    const response = await fetch(DISCORD_WEBHOOK, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ embeds: [embed] })
-    });
+    try {
+        const response = await fetch(DISCORD_WEBHOOK, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ embeds: [embed] })
+        });
 
-    if (response.ok) alert("Posted to Discord!");
-    else alert("Post failed.");
+        if (response.ok) {
+            alert("Posted to Discord successfully!");
+        } else {
+            const errBody = await response.text();
+            alert(`Discord error ${response.status}: ${errBody}`);
+        }
+    } catch (err) {
+        alert("Network error: Check your connection or Webhook URL.");
+    }
 }
 
 async function delMember(id) {
