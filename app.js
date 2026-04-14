@@ -115,7 +115,7 @@ async function sendToDiscord() {
         text += h1 + " " + h2 + " " + h3 + " | **" + m.member_name + "**\n";
     });
     
-    text += "\n*✅ = Hit Complete | ❌ = STRIKE (Missed Hit)*";
+    text += "\n*✅ = Hit Complete | ❌ = Missed Hit*";
     
     await fetch(DISCORD_WEBHOOK, {
         method: 'POST',
