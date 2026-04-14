@@ -72,11 +72,26 @@ async function updateMemberName(id, newName) {
 }
 
 async function addMember() {
-    const name = document.getElementById('new-member-name').value.trim();
+    const nameInput = document.getElementById('new-member-name');
+    const name = nameInput.value.trim();
+    
     if (!name) return;
-    await _supabase.from(currentTable).insert([{ member_name: name }]);
-    init(); // Refresh list without full page reload
-    document.getElementById('new-member-name').value = '';
+
+    // Insert into the table we are currently looking at
+    const { error } = await _supabase.from(currentTable).insert([{ member_name: name }]);
+    
+    if (error) {
+        alert("Error adding member: " + error.message);
+    } else {
+        nameInput.value = ''; // Clear the input box
+        
+        // Refresh the list immediately
+        const sessionRes = await _supabase.auth.getSession();
+        const isAdmin = !!(sessionRes.data && sessionRes.data.session);
+        fetchMembers(isAdmin); 
+        
+        alert("Added to " + (currentTable === 'boss_hits' ? "Graduation" : "Graduation 1.0"));
+    }
 }
 
 async function clearAllHits() {
