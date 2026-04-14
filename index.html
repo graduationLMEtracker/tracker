@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Graduation LME Tracker</title>
+    <title>LME Tracker Hub</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -16,7 +16,12 @@
         </div>
 
         <div class="card">
-            <h1>LME Tracker</h1>
+            <div style="display: flex; gap: 10px; justify-content: center; margin-bottom: 20px;">
+                <button id="btn-main" class="btn primary" onclick="switchTable('boss_hits')">Graduation</button>
+                <button id="btn-v1" class="btn" style="background:#444;" onclick="switchTable('boss_hits_v1')">Graduation 1.0</button>
+            </div>
+
+            <h1 id="list-title">Graduation Tracker</h1>
 
             <div id="admin-tools" style="display:none;" class="admin-bar">
                 <div>
@@ -24,8 +29,8 @@
                     <button class="btn primary" onclick="addMember()">Add Member</button>
                 </div>
                 <div>
-                    <button class="btn discord" onclick="sendToDiscord()">Post to Discord</button>
-                    <button class="btn warning" onclick="clearAllHits()">Reset All Hits</button>
+                    <button class="btn discord" style="background:#5865F2;" onclick="sendToDiscord()">Post to Discord</button>
+                    <button class="btn warning" onclick="clearAllHits()">Reset All</button>
                 </div>
             </div>
 
@@ -40,7 +45,7 @@
                     </tr>
                 </thead>
                 <tbody id="member-list">
-                    <tr><td colspan="5">Connecting to database...</td></tr>
+                    <tr><td colspan="5">Loading data...</td></tr>
                 </tbody>
             </table>
         </div>
