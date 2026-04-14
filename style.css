@@ -2,9 +2,24 @@ body { font-family: sans-serif; background: #121212; color: white; margin: 0; pa
 .container { max-width: 800px; margin: auto; }
 .card { background: #1e1e1e; padding: 20px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
 
-#auth-status { display: flex; align-items: center; margin-bottom: 20px; width: 100%; }
-#secret-banana { cursor: pointer; font-size: 24px; margin-right: auto; padding: 5px; transition: transform 0.2s; }
-#secret-banana:hover { transform: scale(1.2); }
+#auth-status { display: flex; align-items: center; margin-bottom: 20px; width: 100%; height: 40px; }
+
+/* The Secret Hidden Banana Logic */
+#secret-banana { 
+    cursor: pointer; 
+    font-size: 24px; 
+    margin-right: auto; 
+    padding: 5px; 
+    opacity: 0; /* Hidden by default */
+    transition: opacity 0.3s;
+    transition-delay: 0s; /* No delay when mouse leaves */
+}
+
+#secret-banana:hover { 
+    opacity: 1; /* Show it */
+    transition-delay: 5s; /* Wait 5 seconds before showing */
+}
+
 #user-email { margin-right: 10px; color: #aaa; }
 
 .nav-toggle { display: flex; gap: 10px; justify-content: center; margin-bottom: 20px; }
