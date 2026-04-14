@@ -10,26 +10,28 @@
 <body>
     <div class="container">
         <div id="auth-status">
+            <span id="secret-banana" onclick="secretPost()">🍌</span>
+            
             <span id="user-email"></span>
             <button id="login-btn" class="btn primary" onclick="location.href='login.html'">Admin Login</button>
             <button id="logout-btn" class="btn danger" style="display:none;" onclick="logout()">Logout</button>
         </div>
 
         <div class="card">
-            <div style="display: flex; gap: 10px; justify-content: center; margin-bottom: 20px;">
+            <div class="nav-toggle">
                 <button id="btn-main" class="btn primary" onclick="switchTable('boss_hits')">Graduation</button>
-                <button id="btn-v1" class="btn" style="background:#444;" onclick="switchTable('boss_hits_v1')">Graduation 1.0</button>
+                <button id="btn-v1" class="btn secondary" onclick="switchTable('boss_hits_v1')">Graduation 1.0</button>
             </div>
 
             <h1 id="list-title">Graduation Tracker</h1>
 
             <div id="admin-tools" style="display:none;" class="admin-bar">
-                <div>
+                <div class="input-group">
                     <input type="text" id="new-member-name" placeholder="Member Name">
                     <button class="btn primary" onclick="addMember()">Add Member</button>
                 </div>
-                <div>
-                    <button class="btn discord" style="background:#5865F2;" onclick="sendToDiscord()">Post to Discord</button>
+                <div class="action-group">
+                    <button class="btn discord" onclick="sendToDiscord()">Post to Discord</button>
                     <button class="btn warning" onclick="clearAllHits()">Reset All</button>
                 </div>
             </div>
@@ -45,7 +47,7 @@
                     </tr>
                 </thead>
                 <tbody id="member-list">
-                    <tr><td colspan="5">Loading data...</td></tr>
+                    <tr><td colspan="5">Connecting to database...</td></tr>
                 </tbody>
             </table>
         </div>
