@@ -1,0 +1,19 @@
+name: Scheduled Discord Ping
+on:
+  schedule:
+    # This runs at 4:00 PM UTC (12:00 PM Eastern) every Mon, Wed, Fri.
+    # Adjust the '16' if you want a different time of day!
+    - cron: '0 16 * * 1,3,5'
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Ping
+        run: |
+          curl -H "Content-Type: application/json" \
+               -X POST \
+               -d '{
+                 "content": "🛡️ <@&1401746882216198215> **Boss Hits Reminder!**\nPlease check the tracker and update your status: https://your-website-url.com"
+               }' \
+               ${{ secrets.DISCORD_WEBHOOK }}
